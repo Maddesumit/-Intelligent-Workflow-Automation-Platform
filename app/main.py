@@ -81,6 +81,11 @@ async def root():
     }
 
 
-# Include API routers (will be added in Phase 2)
-# from app.api.v1 import workflows, schedules, executions
-# app.include_router(workflows.router, prefix=settings.API_V1_PREFIX, tags=["Workflows"])
+# Include API routers
+from app.api.v1 import workflows
+
+app.include_router(
+    workflows.router,
+    prefix=f"{settings.API_V1_PREFIX}/workflows",
+    tags=["Workflows"]
+)

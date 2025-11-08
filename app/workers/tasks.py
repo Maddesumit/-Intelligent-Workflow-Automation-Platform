@@ -35,23 +35,31 @@ def test_task(self, x: int, y: int):
 
 
 @celery_app.task(base=CallbackTask, bind=True, name="app.workers.tasks.execute_workflow")
-def execute_workflow(self, workflow_id: str):
+def execute_workflow(self, workflow_id: str, input_data: dict = None):
     """
     Execute a workflow.
     
     Args:
         workflow_id: UUID of the workflow to execute
+        input_data: Input data for workflow execution
     
     Returns:
         dict: Execution result
     """
+    import asyncio
+    from app.workers.workflow_executor import execute_workflow_async
+    
     logger.info(f"Starting workflow execution: {workflow_id}")
     
-    # TODO: Implement workflow execution logic in Phase 2
-    # This is a placeholder for now
-    
-    return {
-        "workflow_id": workflow_id,
-        "status": "completed",
-        "message": "Workflow execution placeholder - to be implemented in Phase 2"
-    }
+    try:
+        # Run async workflow execution
+        result = asyncio.run(execute_workflow_async(workflow_id, input_data))
+        logger.info(f"Workflow execution completed: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"Workflow execution failed: {str(e)}")
+        return {
+            "workflow_id": workflow_id,
+            "status": "failed",
+            "error": str(e)
+        }
